@@ -80,7 +80,7 @@ export default function GeneratePanel({
         <div className="generate-panel__issues" role="alert">
           <span className="generate-panel__issues-icon">⚠️</span>
           <div>
-            <strong>{blockingIssues.length} blocking issue{blockingIssues.length > 1 ? 's' : ''} must be resolved:</strong>
+            <strong>{blockingIssues.length} blocking issue{blockingIssues.length > 1 ? 's' : ''} must be resolved before generating:</strong>
             <ul className="generate-panel__issues-list">
               {blockingIssues.map(req => {
                 const file   = fileMatches[req.id] ?? null
@@ -100,7 +100,7 @@ export default function GeneratePanel({
               })}
             </ul>
             <p className="generate-panel__issues-hint">
-              Go back to Matching to fix these issues, or generate anyway (package will be incomplete).
+              ← Go back to Matching to fix these issues. The Generate button will unlock automatically.
             </p>
           </div>
         </div>
@@ -186,10 +186,11 @@ export default function GeneratePanel({
 
         <button
           id="btn-generate-pdf"
-          className={`btn btn--lg generate-panel__btn ${canGenerate ? 'btn--primary' : 'generate-panel__btn--warn'}`}
+          className={`btn btn--lg generate-panel__btn btn--primary`}
           onClick={handleGenerate}
-          disabled={generating}
-          aria-label="Generate PDF package"
+          disabled={generating || !canGenerate}
+          aria-label={canGenerate ? 'Generate PDF package' : 'Fix blocking issues before generating'}
+          title={!canGenerate ? `${blockingIssues.length} blocking issue(s) must be resolved first` : ''}
         >
           {generating ? (
             <>
@@ -203,7 +204,7 @@ export default function GeneratePanel({
               <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
                 <path d="M10 2v12M10 14l-4-4M10 14l4-4M3 17h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {canGenerate ? `Generate ${tender.tender_id}_Package.pdf` : 'Generate Anyway (Incomplete)'}
+              Generate {tender.tender_id}_Package.pdf
             </>
           )}
         </button>

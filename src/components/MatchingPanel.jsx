@@ -1,9 +1,59 @@
-import { useState } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
 import StatusBadge, { computeStatus } from './StatusBadge'
 import { formatBytes } from '../utils/pdfUtils'
 import { formatDate } from '../utils/formatDate'
 import './MatchingPanel.css'
+
+/**
+ * autoMatch — suggests matches based on filename similarity.
+ * Returns a new matches object (reqId → entryId).
+ */
+function autoMatch(requirements, pdfEntries, existingMatches) {
+  const normalize = (s) => s.toLowerCase().replace(/[^a-z0-9]/g, '')
+  const usedEntryIds = new Set(Object.values(existingMatches).filter(Boolean))
+  const newMatches = { ...existingMatches }
+
+  for (const req of requirements) {
+    if (newMatches[req.id]) continue  // already matched
+    const keywords = [
+      ...normalize(req.title_en).split('').reduce((acc, _, i, arr) => {
+        // extract significant words (3+ chars)
+        return acc
+      }, []),
+      normalize(req.title_en),
+      normalize(req.id),
+    ]
+    // Use a simple approach: check if filename contains any keyword from title
+    const titleWords = req.title_en
+      .toLowerCase()
+      .split(/\s+/)
+      .filter(w => w.length >= 3)
+
+    let bestEntry = null
+    let bestScore = 0
+
+    for (const entry of pdfEntries) {
+      if (usedEntryIds.has(entry.id)) continue
+      if (entry.isDuplicate) continue
+
+      const fname = normalize(entry.file.name)
+      let score = 0
+      for (const word of titleWords) {
+        if (fname.includes(normalize(word))) score++
+      }
+      if (score > bestScore) {
+        bestScore = score
+        bestEntry = entry
+      }
+    }
+
+    if (bestEntry && bestScore > 0) {
+      newMatches[req.id] = bestEntry.id
+      usedEntryIds.add(bestEntry.id)
+    }
+  }
+  return newMatches
+}
 
 /**
  * MatchingPanel
@@ -32,6 +82,7 @@ export default function MatchingPanel({
   expiryDates,
   onMatchChange,
   onExpiryChange,
+  onAutoMatch,
 }) {
   const { lang, t } = useLanguage()
 
@@ -51,6 +102,19 @@ export default function MatchingPanel({
     const expiry  = expiryDates[req.id] ?? null
     return computeStatus(req, file, expiry, tender.submission_deadline) === 'ok'
   }).length
+
+  // How many non-duplicate entries are available for auto-match
+  const availableForAutoMatch = pdfEntries.filter(e => !e.isDuplicate && !Object.values(matches).includes(e.id)).length
+
+  function handleAutoMatch() {
+    const newMatches = autoMatch(requirements, pdfEntries, matches)
+    // Apply all new matches by calling onMatchChange for each new one
+    for (const [reqId, entryId] of Object.entries(newMatches)) {
+      if (!matches[reqId] && entryId) {
+        onMatchChange(reqId, entryId)
+      }
+    }
+  }
 
   return (
     <div className="matching-panel">
@@ -80,6 +144,18 @@ export default function MatchingPanel({
             <span className="mp-stat__num">✓</span>
             <span className="mp-stat__label">Ready</span>
           </div>
+        )}
+
+        {/* Auto-match button */}
+        {availableForAutoMatch > 0 && (
+          <button
+            id="btn-auto-match"
+            className="mp-auto-match-btn"
+            onClick={handleAutoMatch}
+            title="Suggest matches based on file names"
+          >
+            ✨ Auto-Match
+          </button>
         )}
       </div>
 
@@ -128,14 +204,13 @@ function MatchRow({ req, lang, t, tender, pdfEntries, matches, expiryDates, onMa
       .map(([, eid]) => eid)
   )
 
-  // Available entries for this row: unmatched + currently selected
+  // Available entries for this row: not used elsewhere AND not a duplicate
+  // Duplicates are NEVER selectable — spec §4.6
   const availableEntries = pdfEntries.filter(
     e => !usedByOther.has(e.id) && !e.isDuplicate
   )
-  // Also include currently selected even if it's a dup (to show it)
-  if (selectedEntry && !availableEntries.includes(selectedEntry)) {
-    availableEntries.unshift(selectedEntry)
-  }
+  // If currently selected entry is a duplicate (shouldn't happen, but guard)
+  // do NOT add it back — force user to clear and pick a valid one
 
   const isExpired     = status === 'expired'
   const expiryNeeded  = status === 'expiry_needed'

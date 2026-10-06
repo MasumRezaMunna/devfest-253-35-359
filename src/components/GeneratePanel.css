@@ -227,9 +227,10 @@
 }
 
 .generate-panel__btn:disabled {
-  opacity: 0.65;
+  opacity: 0.55;
   cursor: not-allowed;
   transform: none !important;
+  filter: grayscale(0.3);
 }
 
 /* Spinner (small) */
