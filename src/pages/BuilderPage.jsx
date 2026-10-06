@@ -4,6 +4,7 @@ import { readAndParseRequirementsFile } from '../utils/parseRequirements'
 import TenderInfoCard from '../components/TenderInfoCard'
 import RequirementsList from '../components/RequirementsList'
 import PdfUploadZone from '../components/PdfUploadZone'
+import MatchingPanel from '../components/MatchingPanel'
 import './BuilderPage.css'
 
 /**
@@ -196,7 +197,39 @@ export default function BuilderPage({ onBack }) {
             pdfEntries={pdfEntries}
             matches={matches}
             expiryDates={expiryDates}
+            onMatchChange={(reqId, entryId) => {
+              setMatches(prev => {
+                const next = { ...prev }
+                if (entryId === null) delete next[reqId]
+                else next[reqId] = entryId
+                return next
+              })
+              // Clear expiry when file is removed
+              if (entryId === null) {
+                setExpiryDates(prev => {
+                  const next = { ...prev }
+                  delete next[reqId]
+                  return next
+                })
+              }
+            }}
+            onExpiryChange={(reqId, date) => {
+              setExpiryDates(prev => ({ ...prev, [reqId]: date }))
+            }}
             onBack={() => setPhase('pdf')}
+            onContinue={() => setPhase('generate')}
+            t={t}
+          />
+        )}
+
+        {phase === 'generate' && tender && (
+          <GeneratePhase
+            tender={tender}
+            requirements={requirements}
+            pdfEntries={pdfEntries}
+            matches={matches}
+            expiryDates={expiryDates}
+            onBack={() => setPhase('match')}
             t={t}
           />
         )}
@@ -323,34 +356,98 @@ function PdfPhase({ tender, requirements, pdfEntries, onPdfChange, onContinue, t
   )
 }
 
-function MatchPhase({ tender, requirements, pdfEntries, matches, expiryDates, onBack, t }) {
+function MatchPhase({ tender, requirements, pdfEntries, matches, expiryDates, onMatchChange, onExpiryChange, onBack, onContinue, t }) {
+  // Check if all blocking issues are resolved
+  const canGenerate = requirements.every(req => {
+    const entryId = matches[req.id] ?? null
+    const file    = entryId ? (pdfEntries.find(e => e.id === entryId)?.file ?? null) : null
+    const expiry  = expiryDates[req.id] ?? null
+    if (!req.mandatory && !file) return true
+    if (!file) return false
+    if (req.has_expiry) {
+      if (!expiry) return false
+      const d  = new Date(expiry + 'T00:00:00')
+      const dl = new Date(tender.submission_deadline + 'T00:00:00')
+      if (d < dl) return false
+    }
+    return true
+  })
+
   return (
     <div className="loaded-phase">
       <TenderInfoCard tender={tender} />
 
-      <div className="loaded-notice loaded-notice--warn" role="status">
-        <span aria-hidden="true">🔗</span>
-        <span>
-          <strong>Coming next:</strong> Document matching interface (Iteration 4).
-          Uploaded files: <strong>{pdfEntries.length}</strong>.
-        </span>
-      </div>
-
       <div className="loaded-section-header">
-        <h2 className="loaded-section-title">Document Requirements</h2>
-        <span className="loaded-section-count">{requirements.length} items</span>
+        <h2 className="loaded-section-title">Match Documents to Requirements</h2>
+        <span className="loaded-section-count">{requirements.length} requirements · {pdfEntries.length} files</span>
       </div>
 
-      <RequirementsList
+      <MatchingPanel
         requirements={requirements}
         tender={tender}
+        pdfEntries={pdfEntries}
         matches={matches}
         expiryDates={expiryDates}
+        onMatchChange={onMatchChange}
+        onExpiryChange={onExpiryChange}
       />
 
       <div className="pdf-phase__actions">
         <button className="builder__back" onClick={onBack}>
           ← Back to Documents
+        </button>
+        <button
+          id="btn-continue-to-generate"
+          className={`btn ${canGenerate ? 'btn--primary' : 'btn--secondary'} btn--lg`}
+          onClick={onContinue}
+        >
+          <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+            <path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+          {canGenerate ? 'Generate Package' : 'Continue Anyway →'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function GeneratePhase({ tender, requirements, pdfEntries, matches, expiryDates, onBack, t }) {
+  const matchedCount = Object.keys(matches).length
+
+  return (
+    <div className="loaded-phase">
+      <TenderInfoCard tender={tender} />
+
+      <div className="loaded-notice loaded-notice--warn" role="status">
+        <span aria-hidden="true">📦</span>
+        <span>
+          <strong>PDF Generation</strong> coming in the next iteration.
+          {matchedCount > 0 && (
+            <> Package will include <strong>{matchedCount}</strong> matched document{matchedCount > 1 ? 's' : ''}.</>
+          )}
+        </span>
+      </div>
+
+      <div className="loaded-section-header">
+        <h2 className="loaded-section-title">Package Summary</h2>
+        <span className="loaded-section-count">{requirements.length} requirements</span>
+      </div>
+
+      <RequirementsList
+        requirements={requirements}
+        tender={tender}
+        matches={Object.fromEntries(
+          Object.entries(matches).map(([reqId, entryId]) => [
+            reqId,
+            pdfEntries.find(e => e.id === entryId)?.file ?? null,
+          ])
+        )}
+        expiryDates={expiryDates}
+      />
+
+      <div className="pdf-phase__actions">
+        <button className="builder__back" onClick={onBack}>
+          ← Back to Matching
         </button>
       </div>
     </div>
