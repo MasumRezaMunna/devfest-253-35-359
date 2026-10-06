@@ -18,6 +18,7 @@ A **frontend-only React application** that helps office staff turn a set of PDF 
 | **Live Validation** | 5 statuses: ✅ OK, ⚠️ Expiry Needed, ❌ Missing, ❌ Expired, — Not Provided |
 | **Expiry Date Check** | `expiryDate < deadline` → Expired; `expiryDate ≥ deadline` → OK |
 | **Match & Verify** | Assign each PDF to its requirement via dropdown (1-to-1, duplicates blocked) |
+| **Dark / Light Mode** | Toggle between light and dark themes; persists via localStorage |
 | **Auto-Match** ⭐ | One-click filename-similarity matching to suggest assignments automatically |
 | **Blocked Generate** | Generate button is **disabled** until all blocking issues are resolved (spec §4.7) |
 | **PDF Package Generation** | Produces a single PDF with cover page + document index + all documents in order |
@@ -108,8 +109,8 @@ The `sample-pack/` folder in this repository contains a complete example:
 ```
 src/
 ├── components/
-│   ├── Header.jsx          Header with language toggle
-│   ├── Footer.jsx          App footer
+│   ├── Header.jsx          Header with language + dark/light theme toggle
+│   ├── Footer.jsx          App footer with demo + GitHub links
 │   ├── TenderInfoCard.jsx  Renders tender metadata
 │   ├── StatusBadge.jsx     5-status badge + computeStatus() logic
 │   ├── RequirementsList.jsx  Sorted requirements table
@@ -125,7 +126,8 @@ src/
 │   ├── generatePackage.js    Full PDF generation with cover + index + footer
 │   └── formatDate.js         EN/BN locale date formatting
 ├── contexts/
-│   └── LanguageContext.jsx   Language provider + useLanguage hook
+│   ├── LanguageContext.jsx   Language provider + useLanguage hook
+│   └── ThemeContext.jsx      Dark/light theme provider + useTheme hook
 └── i18n/
     └── translations.js       EN + বাংলা string tables
 ```
@@ -195,9 +197,18 @@ Checklist against the AI DevFest Problem Statement:
 
 ---
 
+## Screenshots
+
+> 📸 **To add screenshots:** Run the app at [tenderpack-builder.netlify.app](https://tenderpack-builder.netlify.app), load the sample pack, go to Match & Verify, and take a screenshot showing the document status badges. Save it as `screenshots/matching-statuses.png` and commit it.
+
+*(Screenshots folder will be added here after capture)*
+
+---
+
 ## AI DevFest Hackathon
 
-- **Team ID**: 253-35-359
+- **Participant ID**: 253-35-359
+- **Participation**: Individual — Vibe Coding
 - **Event**: AI DevFest 2026
-- **Build time**: 90 minutes
-- **Category**: Frontend Application
+- **Live URL**: [https://tenderpack-builder.netlify.app](https://tenderpack-builder.netlify.app)
+- **Source Code**: [github.com/MasumRezaMunna/devfest-253-35-359](https://github.com/MasumRezaMunna/devfest-253-35-359)
