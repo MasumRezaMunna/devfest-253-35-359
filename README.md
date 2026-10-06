@@ -1,6 +1,6 @@
 # Tender Document Package Builder
 
-> **AI DevFest Hackathon 2026** — Team #253-35-359
+> **AI DevFest Hackathon 2026 — Vibe Coding** · Individual Participant
 
 A **frontend-only React application** that helps office staff turn a set of PDF documents into one complete, validated, correctly ordered tender package — entirely in the browser, with zero server uploads.
 
