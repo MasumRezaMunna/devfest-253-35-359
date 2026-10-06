@@ -1,85 +1,300 @@
-/* ──────────────────────────────────────────────────────────
-   BUILDER PAGE — placeholder for Iteration 2+
-   ────────────────────────────────────────────────────────── */
+import { useState, useRef, useCallback } from 'react'
 import { useLanguage } from '../contexts/LanguageContext'
+import { readAndParseRequirementsFile } from '../utils/parseRequirements'
+import TenderInfoCard from '../components/TenderInfoCard'
+import RequirementsList from '../components/RequirementsList'
 import './BuilderPage.css'
 
+/**
+ * BuilderPage
+ *
+ * Step 1 (active): Load requirements.json
+ * Step 2–4: Coming in later iterations
+ *
+ * State:
+ *   phase: 'upload' | 'loaded'
+ *   tender, requirements — from parsed JSON
+ *   matches, expiryDates — populated in later iterations
+ */
 export default function BuilderPage({ onBack }) {
   const { t } = useLanguage()
+
+  const [phase, setPhase] = useState('upload')  // 'upload' | 'loaded'
+  const [tender, setTender]               = useState(null)
+  const [requirements, setRequirements]   = useState([])
+  const [error, setError]                 = useState(null)
+  const [loading, setLoading]             = useState(false)
+  const [isDragOver, setIsDragOver]       = useState(false)
+
+  // Future iterations will populate these
+  const [matches, setMatches]           = useState({}) // reqId → File
+  const [expiryDates, setExpiryDates]   = useState({}) // reqId → "YYYY-MM-DD"
+
+  const fileInputRef = useRef(null)
+
+  // ── File processing ──────────────────────────────────────────────────
+  const handleFile = useCallback(async (file) => {
+    if (!file) return
+
+    setError(null)
+    setLoading(true)
+
+    try {
+      const { tender, requirements } = await readAndParseRequirementsFile(file)
+      setTender(tender)
+      setRequirements(requirements)
+      setMatches({})
+      setExpiryDates({})
+      setPhase('loaded')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  const handleInputChange = (e) => {
+    const file = e.target.files?.[0]
+    handleFile(file)
+    // Reset so same file can be re-uploaded if needed
+    e.target.value = ''
+  }
+
+  const handleReset = () => {
+    setPhase('upload')
+    setTender(null)
+    setRequirements([])
+    setMatches({})
+    setExpiryDates({})
+    setError(null)
+  }
+
+  // ── Drag-and-drop ────────────────────────────────────────────────────
+  const handleDragOver = (e) => {
+    e.preventDefault()
+    setIsDragOver(true)
+  }
+
+  const handleDragLeave = () => setIsDragOver(false)
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setIsDragOver(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file) handleFile(file)
+  }
+
+  // ── Steps ────────────────────────────────────────────────────────────
+  const STEPS = [
+    { num: 1, label: t.step1Title },
+    { num: 2, label: t.step2Title },
+    { num: 3, label: t.step3Title },
+    { num: 4, label: t.step4Title },
+  ]
+
+  const activeStep = phase === 'upload' ? 1 : 2
 
   return (
     <main className="builder">
       <div className="container">
-        {/* Back navigation */}
-        <button
-          id="btn-back-home"
-          className="builder__back"
-          onClick={onBack}
-          aria-label="Go back to home"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-          Back
-        </button>
 
-        <div className="builder__header">
-          <h1 className="builder__title">{t.ctaStart}</h1>
-          <p className="builder__subtitle">
-            Start by uploading a <code>requirements.json</code> file.
-          </p>
-        </div>
+        {/* ── Top bar ── */}
+        <div className="builder__topbar">
+          <button
+            id="btn-back-home"
+            className="builder__back"
+            onClick={onBack}
+            aria-label="Go back to home"
+          >
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+              <path d="M10 4L6 8l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            {t.navHome}
+          </button>
 
-        {/* Step indicator */}
-        <div className="builder__steps">
-          {[
-            { num: 1, label: t.step1Title, active: true },
-            { num: 2, label: t.step2Title, active: false },
-            { num: 3, label: t.step3Title, active: false },
-            { num: 4, label: t.step4Title, active: false },
-          ].map(s => (
-            <div
-              key={s.num}
-              className={`builder__step-pill ${s.active ? 'builder__step-pill--active' : ''}`}
+          {phase === 'loaded' && (
+            <button
+              id="btn-reset"
+              className="builder__reset"
+              onClick={handleReset}
+              title="Load a different requirements.json"
             >
-              <span className="builder__step-pill-num">{s.num}</span>
-              <span className="builder__step-pill-label">{s.label}</span>
-            </div>
-          ))}
-        </div>
-
-        {/* Upload card — coming in Iteration 2 */}
-        <div className="builder__upload-card">
-          <div className="upload-placeholder">
-            <div className="upload-placeholder__icon">📋</div>
-            <h2 className="upload-placeholder__title">Load Requirements File</h2>
-            <p className="upload-placeholder__desc">
-              Upload the <code>requirements.json</code> file for this tender.
-              The application will read the tender details and document requirements automatically.
-            </p>
-            <label
-              id="label-req-upload"
-              htmlFor="input-req-file"
-              className="btn btn--primary upload-placeholder__btn"
-            >
-              <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
-                <path d="M9 2v10M9 2L6 5M9 2l3 3M3 14h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M1 7a6 6 0 1 0 6-6 6 6 0 0 0-4.24 1.76L1 1" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+                <path d="M1 1v3h3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              Choose requirements.json
-            </label>
-            <input
-              id="input-req-file"
-              type="file"
-              accept=".json,application/json"
-              className="upload-placeholder__input"
-              aria-label="Upload requirements.json"
-            />
-            <p className="upload-placeholder__hint">
-              JSON files only · Max 1 MB
-            </p>
-          </div>
+              Load Different File
+            </button>
+          )}
         </div>
+
+        {/* ── Step progress ── */}
+        <div className="builder__steps" role="list" aria-label="Package creation steps">
+          {STEPS.map((s) => {
+            const isDone   = s.num < activeStep
+            const isActive = s.num === activeStep
+            return (
+              <div
+                key={s.num}
+                className={`builder__step-pill ${isActive ? 'builder__step-pill--active' : ''} ${isDone ? 'builder__step-pill--done' : ''}`}
+                role="listitem"
+                aria-current={isActive ? 'step' : undefined}
+              >
+                <span className="builder__step-pill-num">
+                  {isDone ? '✓' : s.num}
+                </span>
+                <span className="builder__step-pill-label">{s.label}</span>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* ── Content area ── */}
+        {phase === 'upload' && (
+          <UploadPhase
+            loading={loading}
+            error={error}
+            isDragOver={isDragOver}
+            fileInputRef={fileInputRef}
+            onInputChange={handleInputChange}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            onClearError={() => setError(null)}
+          />
+        )}
+
+        {phase === 'loaded' && tender && (
+          <LoadedPhase
+            tender={tender}
+            requirements={requirements}
+            matches={matches}
+            expiryDates={expiryDates}
+            t={t}
+          />
+        )}
+
       </div>
     </main>
+  )
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   Sub-components
+───────────────────────────────────────────────────────────────────── */
+
+function UploadPhase({ loading, error, isDragOver, fileInputRef, onInputChange, onDragOver, onDragLeave, onDrop, onClearError }) {
+  return (
+    <div className="upload-phase">
+      {/* Error banner */}
+      {error && (
+        <div className="upload-error" role="alert">
+          <span className="upload-error__icon" aria-hidden="true">⚠️</span>
+          <span className="upload-error__msg">{error}</span>
+          <button
+            className="upload-error__close"
+            onClick={onClearError}
+            aria-label="Dismiss error"
+          >✕</button>
+        </div>
+      )}
+
+      {/* Drop zone */}
+      <div
+        className={`upload-dropzone ${isDragOver ? 'upload-dropzone--over' : ''} ${loading ? 'upload-dropzone--loading' : ''}`}
+        onDragOver={onDragOver}
+        onDragLeave={onDragLeave}
+        onDrop={onDrop}
+        aria-label="Drop requirements.json here or click to browse"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+        onClick={() => fileInputRef.current?.click()}
+      >
+        {loading ? (
+          <div className="upload-dropzone__loading">
+            <div className="spinner" aria-label="Loading" />
+            <p>Parsing requirements…</p>
+          </div>
+        ) : (
+          <>
+            <div className="upload-dropzone__icon" aria-hidden="true">
+              {isDragOver ? '📂' : '📋'}
+            </div>
+            <h2 className="upload-dropzone__title">
+              {isDragOver ? 'Drop it here!' : 'Load Requirements File'}
+            </h2>
+            <p className="upload-dropzone__desc">
+              Drag and drop your <code>requirements.json</code> here, or click to browse.
+            </p>
+            <span className="btn btn--primary upload-dropzone__btn">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 2v8M8 2L5 5M8 2l3 3M2 13h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Choose File
+            </span>
+            <p className="upload-dropzone__hint">JSON only · Max 1 MB</p>
+          </>
+        )}
+      </div>
+
+      <input
+        ref={fileInputRef}
+        id="input-req-file"
+        type="file"
+        accept=".json,application/json"
+        className="visually-hidden"
+        onChange={onInputChange}
+        aria-label="Upload requirements.json"
+      />
+
+      {/* Helper note */}
+      <div className="upload-hint-card">
+        <span className="upload-hint-card__icon" aria-hidden="true">💡</span>
+        <div>
+          <strong>Expected file:</strong> <code>requirements.json</code> from the tender package.
+          It contains the tender details and the list of required documents.
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function LoadedPhase({ tender, requirements, matches, expiryDates, t }) {
+  const mandatoryDone = requirements
+    .filter(r => r.mandatory)
+    .every(r => matches[r.id])
+
+  return (
+    <div className="loaded-phase">
+      {/* Tender card */}
+      <TenderInfoCard tender={tender} />
+
+      {/* Progress notice */}
+      {!mandatoryDone && (
+        <div className="loaded-notice loaded-notice--warn" role="status">
+          <span aria-hidden="true">📎</span>
+          <span>
+            <strong>Next step:</strong> Upload your PDF documents and match them to requirements.
+            {' '}(Coming in Step 2)
+          </span>
+        </div>
+      )}
+
+      {/* Requirements list */}
+      <div className="loaded-section-header">
+        <h2 className="loaded-section-title">Document Requirements</h2>
+        <span className="loaded-section-count">
+          {requirements.length} items
+        </span>
+      </div>
+
+      <RequirementsList
+        requirements={requirements}
+        tender={tender}
+        matches={matches}
+        expiryDates={expiryDates}
+      />
+    </div>
   )
 }
