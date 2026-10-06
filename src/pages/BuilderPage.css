@@ -1,0 +1,156 @@
+.builder {
+  min-height: calc(100vh - 64px);
+  padding: var(--space-10) 0 var(--space-20);
+  background: var(--color-bg);
+}
+
+.builder__back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-8);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.builder__back:hover {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.builder__header {
+  margin-bottom: var(--space-8);
+}
+
+.builder__title {
+  font-size: var(--font-size-3xl);
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin-bottom: var(--space-2);
+}
+
+.builder__subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--color-text-muted);
+}
+
+/* Step pills */
+.builder__steps {
+  display: flex;
+  gap: var(--space-3);
+  margin-bottom: var(--space-10);
+  flex-wrap: wrap;
+}
+
+.builder__step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-muted);
+  transition: all var(--transition-base);
+}
+
+.builder__step-pill--active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.builder__step-pill-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: currentColor;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.builder__step-pill--active .builder__step-pill-num {
+  background: var(--color-primary);
+  color: white;
+}
+
+/* Upload card */
+.builder__upload-card {
+  background: var(--color-surface);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  transition: border-color var(--transition-base);
+}
+
+.builder__upload-card:hover {
+  border-color: var(--color-primary);
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-16) var(--space-8);
+  text-align: center;
+}
+
+.upload-placeholder__icon {
+  font-size: 3rem;
+  margin-bottom: var(--space-5);
+  filter: grayscale(0.3);
+}
+
+.upload-placeholder__title {
+  font-size: var(--font-size-xl);
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+.upload-placeholder__desc {
+  font-size: var(--font-size-base);
+  color: var(--color-text-muted);
+  max-width: 500px;
+  line-height: 1.7;
+  margin-bottom: var(--space-6);
+}
+
+.upload-placeholder__desc code {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 0.9em;
+  background: var(--color-border-muted);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+}
+
+.upload-placeholder__btn {
+  margin-bottom: var(--space-3);
+  cursor: pointer;
+}
+
+.upload-placeholder__input {
+  display: none;
+}
+
+.upload-placeholder__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+}
