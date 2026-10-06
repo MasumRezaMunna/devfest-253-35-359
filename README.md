@@ -199,9 +199,11 @@ Checklist against the AI DevFest Problem Statement:
 
 ## Screenshots
 
-> 📸 **To add screenshots:** Run the app at [tenderpack-builder.netlify.app](https://tenderpack-builder.netlify.app), load the sample pack, go to Match & Verify, and take a screenshot showing the document status badges. Save it as `screenshots/matching-statuses.png` and commit it.
+### Document Status Validation (Match & Verify step)
 
-*(Screenshots folder will be added here after capture)*
+![Document statuses showing OK, Missing, Expiry Date Needed, and Not Provided](screenshots/document-statuses.png)
+
+> The app shows all 10 requirements with live status badges. Blocking issues (red/amber) must be resolved before the Generate button is enabled.
 
 ---
 
