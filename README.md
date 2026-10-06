@@ -4,7 +4,7 @@
 
 A **frontend-only React application** that helps office staff turn a set of PDF documents into one complete, validated, correctly ordered tender package — entirely in the browser, with zero server uploads.
 
-🌐 **Live Demo**: [Deployed on Netlify] *(add URL after deployment)*
+🌐 **Live Demo**: [tenderpack-builder.netlify.app](https://tenderpack-builder.netlify.app)
 
 ---
 
@@ -133,6 +133,8 @@ src/
 ---
 
 ## Deployment on Netlify
+
+✅ **Live at**: [https://tenderpack-builder.netlify.app](https://tenderpack-builder.netlify.app)
 
 This project includes a `netlify.toml` configuration file.
 
