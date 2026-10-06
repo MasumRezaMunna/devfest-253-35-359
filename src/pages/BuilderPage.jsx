@@ -3,30 +3,37 @@ import { useLanguage } from '../contexts/LanguageContext'
 import { readAndParseRequirementsFile } from '../utils/parseRequirements'
 import TenderInfoCard from '../components/TenderInfoCard'
 import RequirementsList from '../components/RequirementsList'
+import PdfUploadZone from '../components/PdfUploadZone'
 import './BuilderPage.css'
 
 /**
  * BuilderPage
  *
- * Step 1 (active): Load requirements.json
- * Step 2–4: Coming in later iterations
+ * Phases:
+ *   'upload'  → Step 1: Load requirements.json
+ *   'pdf'     → Step 2: Upload PDF documents
+ *   'match'   → Step 3: Match & Verify (Iteration 4)
+ *   'generate'→ Step 4: Generate Package (Iteration 6)
  *
  * State:
- *   phase: 'upload' | 'loaded'
  *   tender, requirements — from parsed JSON
- *   matches, expiryDates — populated in later iterations
+ *   pdfEntries           — enriched PDF file list
+ *   matches, expiryDates — populated in Iteration 4
  */
 export default function BuilderPage({ onBack }) {
   const { t } = useLanguage()
 
-  const [phase, setPhase] = useState('upload')  // 'upload' | 'loaded'
+  const [phase, setPhase] = useState('upload')  // 'upload' | 'pdf' | 'match' | 'generate'
   const [tender, setTender]               = useState(null)
   const [requirements, setRequirements]   = useState([])
   const [error, setError]                 = useState(null)
   const [loading, setLoading]             = useState(false)
   const [isDragOver, setIsDragOver]       = useState(false)
 
-  // Future iterations will populate these
+  // Step 2: PDF files
+  const [pdfEntries, setPdfEntries]     = useState([])  // PdfEntry[]
+
+  // Step 3: Matching (Iteration 4)
   const [matches, setMatches]           = useState({}) // reqId → File
   const [expiryDates, setExpiryDates]   = useState({}) // reqId → "YYYY-MM-DD"
 
@@ -45,7 +52,8 @@ export default function BuilderPage({ onBack }) {
       setRequirements(requirements)
       setMatches({})
       setExpiryDates({})
-      setPhase('loaded')
+      setPdfEntries([])
+      setPhase('pdf')
     } catch (err) {
       setError(err.message)
     } finally {
@@ -65,6 +73,7 @@ export default function BuilderPage({ onBack }) {
     setTender(null)
     setRequirements([])
     setMatches({})
+    setPdfEntries([])
     setExpiryDates({})
     setError(null)
   }
@@ -92,7 +101,12 @@ export default function BuilderPage({ onBack }) {
     { num: 4, label: t.step4Title },
   ]
 
-  const activeStep = phase === 'upload' ? 1 : 2
+  const activeStep = {
+    upload:   1,
+    pdf:      2,
+    match:    3,
+    generate: 4,
+  }[phase] ?? 1
 
   return (
     <main className="builder">
@@ -112,7 +126,7 @@ export default function BuilderPage({ onBack }) {
             {t.navHome}
           </button>
 
-          {phase === 'loaded' && (
+          {phase !== 'upload' && (
             <button
               id="btn-reset"
               className="builder__reset"
@@ -164,12 +178,25 @@ export default function BuilderPage({ onBack }) {
           />
         )}
 
-        {phase === 'loaded' && tender && (
-          <LoadedPhase
+        {phase === 'pdf' && tender && (
+          <PdfPhase
             tender={tender}
             requirements={requirements}
+            pdfEntries={pdfEntries}
+            onPdfChange={setPdfEntries}
+            onContinue={() => setPhase('match')}
+            t={t}
+          />
+        )}
+
+        {phase === 'match' && tender && (
+          <MatchPhase
+            tender={tender}
+            requirements={requirements}
+            pdfEntries={pdfEntries}
             matches={matches}
             expiryDates={expiryDates}
+            onBack={() => setPhase('pdf')}
             t={t}
           />
         )}
@@ -260,35 +287,81 @@ function UploadPhase({ loading, error, isDragOver, fileInputRef, onInputChange, 
   )
 }
 
-function LoadedPhase({ tender, requirements, matches, expiryDates, t }) {
-  const mandatoryDone = requirements
-    .filter(r => r.mandatory)
-    .every(r => matches[r.id])
+function PdfPhase({ tender, requirements, pdfEntries, onPdfChange, onContinue, t }) {
+  const canContinue = pdfEntries.length > 0
 
   return (
     <div className="loaded-phase">
-      {/* Tender card */}
       <TenderInfoCard tender={tender} />
 
-      {/* Progress notice */}
-      {!mandatoryDone && (
-        <div className="loaded-notice loaded-notice--warn" role="status">
-          <span aria-hidden="true">📎</span>
-          <span>
-            <strong>Next step:</strong> Upload your PDF documents and match them to requirements.
-            {' '}(Coming in Step 2)
-          </span>
-        </div>
-      )}
-
-      {/* Requirements list */}
       <div className="loaded-section-header">
-        <h2 className="loaded-section-title">Document Requirements</h2>
-        <span className="loaded-section-count">
-          {requirements.length} items
+        <h2 className="loaded-section-title">Upload PDF Documents</h2>
+        <span className="loaded-section-count">{requirements.length} requirements</span>
+      </div>
+
+      <PdfUploadZone entries={pdfEntries} onChange={onPdfChange} />
+
+      <div className="pdf-phase__actions">
+        {canContinue ? (
+          <button
+            id="btn-continue-to-match"
+            className="btn btn--primary btn--lg"
+            onClick={onContinue}
+          >
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <path d="M4 9h10M10 5l4 4-4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            Continue to Match & Verify
+          </button>
+        ) : (
+          <p className="pdf-phase__hint">
+            Upload at least one PDF to continue.
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function MatchPhase({ tender, requirements, pdfEntries, matches, expiryDates, onBack, t }) {
+  return (
+    <div className="loaded-phase">
+      <TenderInfoCard tender={tender} />
+
+      <div className="loaded-notice loaded-notice--warn" role="status">
+        <span aria-hidden="true">🔗</span>
+        <span>
+          <strong>Coming next:</strong> Document matching interface (Iteration 4).
+          Uploaded files: <strong>{pdfEntries.length}</strong>.
         </span>
       </div>
 
+      <div className="loaded-section-header">
+        <h2 className="loaded-section-title">Document Requirements</h2>
+        <span className="loaded-section-count">{requirements.length} items</span>
+      </div>
+
+      <RequirementsList
+        requirements={requirements}
+        tender={tender}
+        matches={matches}
+        expiryDates={expiryDates}
+      />
+
+      <div className="pdf-phase__actions">
+        <button className="builder__back" onClick={onBack}>
+          ← Back to Documents
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// Keep for compatibility — was used in previous iteration
+function LoadedPhase({ tender, requirements, matches, expiryDates, t }) {
+  return (
+    <div className="loaded-phase">
+      <TenderInfoCard tender={tender} />
       <RequirementsList
         requirements={requirements}
         tender={tender}

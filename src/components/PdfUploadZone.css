@@ -1,0 +1,205 @@
+.pdf-upload {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+/* ── Errors ──────────────────────────── */
+.pdf-upload__errors {
+  position: relative;
+  padding: var(--space-4) var(--space-10) var(--space-4) var(--space-5);
+  background: var(--color-error-bg);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  animation: slideDown 0.2s ease;
+}
+
+.pdf-upload__error {
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  font-weight: 500;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.pdf-upload__clear-errors {
+  position: absolute;
+  top: var(--space-3);
+  right: var(--space-4);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-error);
+  cursor: pointer;
+  background: none;
+  border: none;
+  opacity: 0.7;
+  transition: opacity var(--transition-fast);
+}
+
+.pdf-upload__clear-errors:hover { opacity: 1; }
+
+/* ── Stats bar ───────────────────────── */
+.pdf-upload__stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-border-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text-muted);
+}
+
+.pdf-upload__stats--dup {
+  color: var(--color-warn);
+}
+
+/* ── Drop zone ───────────────────────── */
+.pdf-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-8) var(--space-6);
+  background: var(--color-surface);
+  border: 2px dashed var(--color-border);
+  border-radius: var(--radius-xl);
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--transition-base);
+}
+
+.pdf-dropzone:hover,
+.pdf-dropzone:focus-within {
+  border-color: var(--color-primary);
+  background: #fafbff;
+  outline: none;
+}
+
+.pdf-dropzone--over {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  transform: scale(1.01);
+}
+
+.pdf-dropzone__icon {
+  font-size: 2rem;
+  transition: transform var(--transition-base);
+}
+
+.pdf-dropzone:hover .pdf-dropzone__icon {
+  transform: scale(1.1);
+}
+
+.pdf-dropzone__label {
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.pdf-dropzone__hint {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-light);
+}
+
+/* ── File list ───────────────────────── */
+.pdf-file-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pdf-file-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: all var(--transition-fast);
+  animation: fadeInUp 0.2s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pdf-file-row:hover {
+  border-color: rgba(26, 86, 219, 0.25);
+  box-shadow: var(--shadow-sm);
+}
+
+.pdf-file-row--dup {
+  border-color: rgba(217, 119, 6, 0.4);
+  background: var(--color-warn-bg);
+}
+
+.pdf-file-row__icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.pdf-file-row__info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.pdf-file-row__name {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdf-file-row__meta {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+}
+
+.pdf-file-row__counting {
+  color: var(--color-text-light);
+  font-style: italic;
+}
+
+.pdf-file-row__dup-tag {
+  color: var(--color-warn);
+  font-weight: 700;
+}
+
+.pdf-file-row__remove {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-md);
+  border: none;
+  background: transparent;
+  color: var(--color-text-light);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.pdf-file-row__remove:hover {
+  background: var(--color-error-bg);
+  color: var(--color-error);
+}
