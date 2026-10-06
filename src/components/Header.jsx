@@ -1,35 +1,64 @@
 import { useLanguage } from '../contexts/LanguageContext'
+import { useTheme } from '../contexts/ThemeContext'
 import './Header.css'
 
 export default function Header() {
   const { lang, toggleLanguage, t } = useLanguage()
+  const { theme, toggleTheme } = useTheme()
+  const isDark = theme === 'dark'
 
   return (
     <header className="header">
       <div className="container header__inner">
+
+        {/* Brand */}
         <div className="header__brand">
-          <div className="header__logo">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-              <rect width="32" height="32" rx="8" fill="#1a56db"/>
-              <path d="M8 10h10M8 14h10M8 18h7" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-              <path d="M20 16l4 4-4 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              <circle cx="24" cy="12" r="3" fill="#34d399" stroke="white" strokeWidth="1.5"/>
+          <div className="header__logo" aria-hidden="true">
+            <svg width="34" height="34" viewBox="0 0 34 34" fill="none">
+              <rect width="34" height="34" rx="9" fill="var(--color-primary)"/>
+              <path d="M9 11h11M9 15h11M9 19h8" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+              <path d="M21 17l4 4-4 4" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <circle cx="25" cy="12" r="3.5" fill="#34d399" stroke="white" strokeWidth="1.5"/>
             </svg>
           </div>
-          <span className="header__app-name">{t.appName}</span>
+          <div className="header__brand-text">
+            <span className="header__app-name">{t.appName}</span>
+            <span className="header__app-sub">AI DevFest 2026</span>
+          </div>
         </div>
 
+        {/* Nav controls */}
         <nav className="header__nav" aria-label="Main navigation">
+
+          {/* Language toggle */}
           <button
             id="btn-lang-toggle"
-            className="btn btn--ghost btn--sm header__lang-btn"
+            className="header__icon-btn"
             onClick={toggleLanguage}
             aria-label={lang === 'en' ? 'Switch to Bangla' : 'Switch to English'}
             title={lang === 'en' ? 'বাংলায় দেখুন' : 'View in English'}
           >
             <span className="lang-icon" aria-hidden="true">🌐</span>
-            {lang === 'en' ? 'বাংলা' : 'English'}
+            <span className="header__icon-btn-label">
+              {lang === 'en' ? 'বাংলা' : 'English'}
+            </span>
           </button>
+
+          {/* Theme toggle */}
+          <button
+            id="btn-theme-toggle"
+            className="header__theme-btn"
+            onClick={toggleTheme}
+            aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            <span className="header__theme-track">
+              <span className="header__theme-thumb">
+                {isDark ? '🌙' : '☀️'}
+              </span>
+            </span>
+          </button>
+
         </nav>
       </div>
     </header>

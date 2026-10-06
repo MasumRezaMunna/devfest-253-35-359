@@ -1,7 +1,8 @@
 .builder {
-  min-height: calc(100vh - 64px);
+  min-height: calc(100vh - 66px);
   padding: var(--space-8) 0 var(--space-20);
   background: var(--color-bg);
+  animation: fadeIn 0.3s ease;
 }
 
 /* ── Top bar ─────────────────────────── */
@@ -80,7 +81,8 @@
   border-color: var(--color-primary);
   background: var(--color-primary-light);
   color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(26, 86, 219, 0.1);
+  box-shadow: 0 0 0 3px var(--color-primary-glow);
+  animation: pulse-ring 2.4s ease-in-out infinite;
 }
 
 .builder__step-pill--done {
@@ -109,6 +111,7 @@
 
 .builder__step-pill--active .builder__step-pill-num {
   background: var(--color-primary);
+  color: white;
 }
 
 /* ── Upload phase ────────────────────── */

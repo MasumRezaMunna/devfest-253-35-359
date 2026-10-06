@@ -28,7 +28,9 @@ export default function LandingPage({ onStart }) {
           <div className="hero__badge">
             <span className="badge badge--blue">AI DevFest Hackathon</span>
           </div>
-          <h1 id="hero-heading" className="hero__title">{t.heroTitle}</h1>
+          <h1 id="hero-heading" className="hero__title">
+            <span className="hero__title-accent">{t.heroTitle}</span>
+          </h1>
           <p className="hero__subtitle">{t.heroSubtitle}</p>
           <p className="hero__privacy">
             {t.heroPrivacyNote}

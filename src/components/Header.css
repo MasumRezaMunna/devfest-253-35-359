@@ -1,21 +1,28 @@
+/* ── Header shell ───────────────────────────────────────────── */
 .header {
   position: sticky;
   top: 0;
   z-index: 100;
-  background: rgba(255, 255, 255, 0.92);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border-bottom: 1px solid var(--color-border);
   box-shadow: var(--shadow-sm);
+  animation: fadeIn 0.4s ease;
+}
+
+[data-theme="dark"] .header {
+  background: rgba(20, 25, 38, 0.85);
 }
 
 .header__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 64px;
+  height: 66px;
 }
 
+/* ── Brand ──────────────────────────────────────────────────── */
 .header__brand {
   display: flex;
   align-items: center;
@@ -26,46 +33,125 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  filter: drop-shadow(0 2px 6px var(--color-primary-glow));
+  transition: transform var(--transition-fast);
+}
+
+.header__logo:hover {
+  transform: rotate(-5deg) scale(1.05);
+}
+
+.header__brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .header__app-name {
   font-size: var(--font-size-base);
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-text);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
+.header__app-sub {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--color-primary);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.75;
+}
+
+/* ── Nav ────────────────────────────────────────────────────── */
 .header__nav {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
 }
 
-.header__lang-btn {
+/* ── Icon button (language) ─────────────────────────────────── */
+.header__icon-btn {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 6px;
   font-size: var(--font-size-sm);
   font-weight: 600;
   color: var(--color-text-muted);
-  padding: var(--space-2) var(--space-3);
+  padding: 6px 12px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: var(--color-surface);
+  cursor: pointer;
   transition: all var(--transition-fast);
 }
 
-.header__lang-btn:hover {
+.header__icon-btn:hover {
   color: var(--color-primary);
   border-color: var(--color-primary);
   background: var(--color-primary-light);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-sm);
 }
 
-.lang-icon {
-  font-size: 1rem;
+.header__icon-btn-label {
+  font-size: var(--font-size-sm);
 }
 
-/* ---------- Shared Button Styles ---------- */
+/* ── Theme toggle pill ──────────────────────────────────────── */
+.header__theme-btn {
+  padding: 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.header__theme-track {
+  display: flex;
+  align-items: center;
+  width: 52px;
+  height: 28px;
+  background: var(--color-border-muted);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-full);
+  padding: 2px;
+  transition: background var(--transition-base), border-color var(--transition-base);
+  position: relative;
+}
+
+[data-theme="dark"] .header__theme-track {
+  background: var(--color-surface-2);
+  border-color: var(--color-border);
+}
+
+.header__theme-thumb {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  background: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-base), background var(--transition-base);
+  transform: translateX(0);
+  user-select: none;
+}
+
+[data-theme="dark"] .header__theme-thumb {
+  transform: translateX(24px);
+  background: var(--color-surface);
+}
+
+.header__theme-btn:hover .header__theme-thumb {
+  box-shadow: var(--shadow-md);
+}
+
+/* ── Shared Button System ───────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -78,24 +164,47 @@
   border: none;
   text-decoration: none;
   white-space: nowrap;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0);
+  transition: background var(--transition-fast);
+  border-radius: inherit;
+}
+
+.btn:active::after {
+  background: rgba(255,255,255,0.15);
 }
 
 .btn--primary {
   background: var(--color-primary);
-  color: #ffffff;
+  color: #fff;
   padding: var(--space-3) var(--space-6);
   font-size: var(--font-size-base);
-  box-shadow: 0 1px 2px rgba(26, 86, 219, 0.3);
+  box-shadow: 0 2px 8px var(--color-primary-glow);
 }
 
-.btn--primary:hover {
+.btn--primary:hover:not(:disabled) {
   background: var(--color-primary-dark);
-  box-shadow: 0 4px 12px rgba(26, 86, 219, 0.35);
-  transform: translateY(-1px);
+  box-shadow: 0 4px 16px var(--color-primary-glow);
+  transform: translateY(-2px);
 }
 
-.btn--primary:active {
+.btn--primary:active:not(:disabled) {
   transform: translateY(0);
+}
+
+.btn--primary:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(0.25);
+  transform: none !important;
 }
 
 .btn--secondary {
@@ -108,6 +217,7 @@
 
 .btn--secondary:hover {
   background: var(--color-primary-light);
+  transform: translateY(-1px);
 }
 
 .btn--ghost {
@@ -123,7 +233,7 @@
 
 .btn--sm {
   font-size: var(--font-size-sm);
-  padding: var(--space-1) var(--space-2);
+  padding: var(--space-1) var(--space-3);
 }
 
 .btn--lg {
