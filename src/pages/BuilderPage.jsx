@@ -5,6 +5,7 @@ import TenderInfoCard from '../components/TenderInfoCard'
 import RequirementsList from '../components/RequirementsList'
 import PdfUploadZone from '../components/PdfUploadZone'
 import MatchingPanel from '../components/MatchingPanel'
+import GeneratePanel from '../components/GeneratePanel'
 import './BuilderPage.css'
 
 /**
@@ -412,50 +413,22 @@ function MatchPhase({ tender, requirements, pdfEntries, matches, expiryDates, on
 }
 
 function GeneratePhase({ tender, requirements, pdfEntries, matches, expiryDates, onBack, t }) {
-  const matchedCount = Object.keys(matches).length
-
   return (
     <div className="loaded-phase">
-      <TenderInfoCard tender={tender} />
-
-      <div className="loaded-notice loaded-notice--warn" role="status">
-        <span aria-hidden="true">📦</span>
-        <span>
-          <strong>PDF Generation</strong> coming in the next iteration.
-          {matchedCount > 0 && (
-            <> Package will include <strong>{matchedCount}</strong> matched document{matchedCount > 1 ? 's' : ''}.</>
-          )}
-        </span>
-      </div>
-
-      <div className="loaded-section-header">
-        <h2 className="loaded-section-title">Package Summary</h2>
-        <span className="loaded-section-count">{requirements.length} requirements</span>
-      </div>
-
-      <RequirementsList
-        requirements={requirements}
+      <GeneratePanel
         tender={tender}
-        matches={Object.fromEntries(
-          Object.entries(matches).map(([reqId, entryId]) => [
-            reqId,
-            pdfEntries.find(e => e.id === entryId)?.file ?? null,
-          ])
-        )}
+        requirements={requirements}
+        pdfEntries={pdfEntries}
+        matches={matches}
         expiryDates={expiryDates}
+        onBack={onBack}
       />
-
-      <div className="pdf-phase__actions">
-        <button className="builder__back" onClick={onBack}>
-          ← Back to Matching
-        </button>
-      </div>
     </div>
   )
 }
 
-// Keep for compatibility — was used in previous iteration
-function LoadedPhase({ tender, requirements, matches, expiryDates, t }) {
+// Keep for compatibility
+function LoadedPhase({ tender, requirements, matches, expiryDates }) {
   return (
     <div className="loaded-phase">
       <TenderInfoCard tender={tender} />
@@ -468,3 +441,4 @@ function LoadedPhase({ tender, requirements, matches, expiryDates, t }) {
     </div>
   )
 }
+
